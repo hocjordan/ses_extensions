@@ -1,0 +1,37 @@
+.api-stats-settings {
+    padding: 10px;
+    margin: 10px 0;
+}
+
+.api-stats-fetcher-settings {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 10px;
+}
+
+.api-stats-fetcher-settings label {
+    margin-bottom: 5px;
+}
+
+.api-stats-display {
+    margin: 10px 0;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    background-color: var(--background-color);
+}
+
+.api-stats-content {
+    font-size: 14px;
+}
+
+.api-stats-content h4 {
+    margin: 0 0 10px 0;
+}
+
+.api-stats-content pre {
+    margin: 0;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
