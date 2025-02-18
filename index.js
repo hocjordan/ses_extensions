@@ -17,6 +17,7 @@ jQuery(() => {
     
     // Register function tool if supported
     if (context.isToolCallingSupported()) {
+        console.log('Function tools are supported');
         context.registerFunctionTool({
             name: "readKpmLogs",
             displayName: "Read KPM Logs",
@@ -60,6 +61,9 @@ jQuery(() => {
                 return true;
             }
         });
+        console.log('Function tools registered');
+    } else {
+        console.log('Function tools are not supported');
     }
     
     // Add settings UI
