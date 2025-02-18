@@ -6,6 +6,7 @@ import * as path from 'path';
 // Extension initialization
 window.apiStatsFetcher = {
     settings: {
+        apiPort: 8000,  // Default FastAPI port
         refreshInterval: 60, // in seconds
     },
 };
@@ -19,7 +20,7 @@ jQuery(() => {
         context.registerFunctionTool({
             name: "readKpmLogs",
             displayName: "Read KPM Logs",
-            description: "Read the contents of the KPM logs file (~/.kpm_logs.csv). Use this when you need to access keyboard activity statistics.",
+            description: "Read the contents of the KPM logs file (~/.kpm_log.csv). Use this when you need to access keyboard activity statistics.",
             parameters: {
                 $schema: 'http://json-schema.org/draft-04/schema#',
                 type: 'object',
@@ -33,16 +34,21 @@ jQuery(() => {
             },
             action: async ({ maxLines }) => {
                 try {
-                    const homedir = os.homedir();
-                    const logPath = path.join(homedir, '.kpm_log.csv');
+                    const port = window.apiStatsFetcher.settings.apiPort;
+                    const response = await fetch(`http://localhost:${port}/read-logs`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ max_lines: maxLines })  // Note: using snake_case for Python
+                    });
                     
-                    const content = await fs.readFile(logPath, 'utf8');
-                    const lines = content.split('\n').filter(line => line.trim());
-                    
-                    if (maxLines && maxLines > 0) {
-                        return lines.slice(-maxLines).join('\n');
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
                     }
-                    return content;
+                    
+                    const data = await response.text();
+                    return data;
                 } catch (error) {
                     return `Error reading KPM logs: ${error.message}`;
                 }
@@ -66,6 +72,8 @@ jQuery(() => {
                 </div>
                 <div class="inline-drawer-content">
                     <div class="api-stats-fetcher-settings">
+                        <label for="api_port">API Port:</label>
+                        <input type="number" id="api_port" class="text_pole" value="${window.apiStatsFetcher.settings.apiPort}">
                         <label for="refresh_interval">Refresh Interval (seconds):</label>
                         <input type="number" id="refresh_interval" class="text_pole" value="${window.apiStatsFetcher.settings.refreshInterval}">
                     </div>
@@ -78,6 +86,7 @@ jQuery(() => {
     
     // Save settings
     function saveSettings() {
+        window.apiStatsFetcher.settings.apiPort = parseInt($('#api_port').val());
         window.apiStatsFetcher.settings.refreshInterval = parseInt($('#refresh_interval').val());
         console.log('API Stats Fetcher settings saved:', window.apiStatsFetcher.settings);
     }
@@ -87,35 +96,22 @@ jQuery(() => {
         const settings = localStorage.getItem('apiStatsFetcher_settings');
         if (settings) {
             window.apiStatsFetcher.settings = JSON.parse(settings);
+            $('#api_port').val(window.apiStatsFetcher.settings.apiPort);
             $('#refresh_interval').val(window.apiStatsFetcher.settings.refreshInterval);
         }
     }
     
-    // Save settings to localStorage
-    const persistSettings = () => {
+    // Persist settings to localStorage
+    function persistSettings() {
         localStorage.setItem('apiStatsFetcher_settings', JSON.stringify(window.apiStatsFetcher.settings));
     }
     
     // Setup event listeners
-    $('#refresh_interval').on('change', () => {
+    $('#api_port, #refresh_interval').on('change', () => {
         saveSettings();
         persistSettings();
     });
     
-    // Initial load
+    // Initial settings load
     loadSettings();
-    
-    // Setup refresh interval
-    let refreshInterval;
-    
-    function updateRefreshInterval() {
-        if (refreshInterval) {
-            clearInterval(refreshInterval);
-        }
-        refreshInterval = setInterval(fetchStats, window.apiStatsFetcher.settings.refreshInterval * 1000);
-        fetchStats(); // Initial fetch
-    }
-    
-    // Initial refresh interval setup
-    updateRefreshInterval();
 });
