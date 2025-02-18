@@ -1,9 +1,11 @@
 import { getContext } from "../../extensions.js";
+import * as fs from 'fs/promises';
+import * as os from 'os';
+import * as path from 'path';
 
 // Extension initialization
 window.apiStatsFetcher = {
     settings: {
-        apiEndpoint: '',
         refreshInterval: 60, // in seconds
     },
 };
@@ -11,6 +13,48 @@ window.apiStatsFetcher = {
 // Register extension
 jQuery(() => {
     const context = getContext();
+    
+    // Register function tool if supported
+    if (context.isToolCallingSupported()) {
+        context.registerFunctionTool({
+            name: "readKpmLogs",
+            displayName: "Read KPM Logs",
+            description: "Read the contents of the KPM logs file (~/.kpm_logs.csv). Use this when you need to access keyboard activity statistics.",
+            parameters: {
+                $schema: 'http://json-schema.org/draft-04/schema#',
+                type: 'object',
+                properties: {
+                    maxLines: {
+                        type: 'integer',
+                        description: 'Maximum number of lines to read from the end of the file. If not provided, returns all lines.',
+                        optional: true
+                    }
+                }
+            },
+            action: async ({ maxLines }) => {
+                try {
+                    const homedir = os.homedir();
+                    const logPath = path.join(homedir, '.kpm_log.csv');
+                    
+                    const content = await fs.readFile(logPath, 'utf8');
+                    const lines = content.split('\n').filter(line => line.trim());
+                    
+                    if (maxLines && maxLines > 0) {
+                        return lines.slice(-maxLines).join('\n');
+                    }
+                    return content;
+                } catch (error) {
+                    return `Error reading KPM logs: ${error.message}`;
+                }
+            },
+            formatMessage: ({ maxLines }) => {
+                return `Reading KPM logs${maxLines ? ` (last ${maxLines} lines)` : ''}`;
+            },
+            shouldRegister: () => {
+                return true;
+            }
+        });
+    }
     
     // Add settings UI
     const settingsHtml = `
@@ -22,8 +66,6 @@ jQuery(() => {
                 </div>
                 <div class="inline-drawer-content">
                     <div class="api-stats-fetcher-settings">
-                        <label for="api_endpoint">API Endpoint:</label>
-                        <input type="text" id="api_endpoint" class="text_pole" value="${window.apiStatsFetcher.settings.apiEndpoint}">
                         <label for="refresh_interval">Refresh Interval (seconds):</label>
                         <input type="number" id="refresh_interval" class="text_pole" value="${window.apiStatsFetcher.settings.refreshInterval}">
                     </div>
@@ -36,7 +78,6 @@ jQuery(() => {
     
     // Save settings
     function saveSettings() {
-        window.apiStatsFetcher.settings.apiEndpoint = $('#api_endpoint').val();
         window.apiStatsFetcher.settings.refreshInterval = parseInt($('#refresh_interval').val());
         console.log('API Stats Fetcher settings saved:', window.apiStatsFetcher.settings);
     }
@@ -46,7 +87,6 @@ jQuery(() => {
         const settings = localStorage.getItem('apiStatsFetcher_settings');
         if (settings) {
             window.apiStatsFetcher.settings = JSON.parse(settings);
-            $('#api_endpoint').val(window.apiStatsFetcher.settings.apiEndpoint);
             $('#refresh_interval').val(window.apiStatsFetcher.settings.refreshInterval);
         }
     }
@@ -56,33 +96,8 @@ jQuery(() => {
         localStorage.setItem('apiStatsFetcher_settings', JSON.stringify(window.apiStatsFetcher.settings));
     }
     
-    // Fetch stats from API
-    async function fetchStats() {
-        try {
-            const response = await fetch(window.apiStatsFetcher.settings.apiEndpoint);
-            const data = await response.json();
-            
-            // Create or update stats display
-            let statsDiv = $('#api-stats-display');
-            if (statsDiv.length === 0) {
-                statsDiv = $('<div id="api-stats-display" class="api-stats-display"></div>');
-                $('#send_form').before(statsDiv);
-            }
-            
-            // Display the stats
-            statsDiv.html(`
-                <div class="api-stats-content">
-                    <h4>API Stats</h4>
-                    <pre>${JSON.stringify(data, null, 2)}</pre>
-                </div>
-            `);
-        } catch (error) {
-            console.error('Error fetching API stats:', error);
-        }
-    }
-    
     // Setup event listeners
-    $('#api_endpoint, #refresh_interval').on('change', () => {
+    $('#refresh_interval').on('change', () => {
         saveSettings();
         persistSettings();
     });
@@ -97,22 +112,9 @@ jQuery(() => {
         if (refreshInterval) {
             clearInterval(refreshInterval);
         }
-        if (window.apiStatsFetcher.settings.apiEndpoint) {
-            refreshInterval = setInterval(fetchStats, window.apiStatsFetcher.settings.refreshInterval * 1000);
-            fetchStats(); // Initial fetch
-        }
+        refreshInterval = setInterval(fetchStats, window.apiStatsFetcher.settings.refreshInterval * 1000);
+        fetchStats(); // Initial fetch
     }
-    
-    // Watch for settings changes
-    const observer = new MutationObserver(() => {
-        updateRefreshInterval();
-    });
-    
-    observer.observe($('#api_endpoint')[0], {
-        attributes: true,
-        childList: true,
-        characterData: true
-    });
     
     // Initial refresh interval setup
     updateRefreshInterval();
