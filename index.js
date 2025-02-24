@@ -68,6 +68,192 @@ jQuery(() => {
                 }
             });
             console.log('[SES Extensions] Function tool registration completed');
+
+            // Register Garmin function tools
+            context.registerFunctionTool({
+                name: "getGarminUserSummary",
+                displayName: "Get Garmin User Summary",
+                description: "Get today's activity summary from Garmin Connect",
+                parameters: {
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    type: 'object',
+                    properties: {}
+                },
+                action: async () => {
+                    try {
+                        const port = window.apiStatsFetcher.settings.apiPort;
+                        const response = await fetch(`http://localhost:${port}/garmin/user-summary`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                        }
+                        
+                        const data = await response.json();
+                        return data;
+                    } catch (error) {
+                        return `Error fetching Garmin user summary: ${error.message}`;
+                    }
+                },
+                formatMessage: () => "Fetching Garmin user summary",
+                shouldRegister: () => true
+            });
+
+            context.registerFunctionTool({
+                name: "getGarminSteps",
+                displayName: "Get Garmin Steps",
+                description: "Get today's step data from Garmin Connect",
+                parameters: {
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    type: 'object',
+                    properties: {}
+                },
+                action: async () => {
+                    try {
+                        const port = window.apiStatsFetcher.settings.apiPort;
+                        const response = await fetch(`http://localhost:${port}/garmin/steps`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                        }
+                        
+                        const data = await response.json();
+                        return data;
+                    } catch (error) {
+                        return `Error fetching Garmin steps data: ${error.message}`;
+                    }
+                },
+                formatMessage: () => "Fetching Garmin steps data",
+                shouldRegister: () => true
+            });
+
+            context.registerFunctionTool({
+                name: "getGarminHeartRate",
+                displayName: "Get Garmin Heart Rate",
+                description: "Get today's heart rate data from Garmin Connect",
+                parameters: {
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    type: 'object',
+                    properties: {}
+                },
+                action: async () => {
+                    try {
+                        const port = window.apiStatsFetcher.settings.apiPort;
+                        const response = await fetch(`http://localhost:${port}/garmin/heart-rate`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                        }
+                        
+                        const data = await response.json();
+                        return data;
+                    } catch (error) {
+                        return `Error fetching Garmin heart rate data: ${error.message}`;
+                    }
+                },
+                formatMessage: () => "Fetching Garmin heart rate data",
+                shouldRegister: () => true
+            });
+
+            context.registerFunctionTool({
+                name: "getGarminSleep",
+                displayName: "Get Garmin Sleep",
+                description: "Get today's sleep data from Garmin Connect",
+                parameters: {
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    type: 'object',
+                    properties: {}
+                },
+                action: async () => {
+                    try {
+                        const port = window.apiStatsFetcher.settings.apiPort;
+                        const response = await fetch(`http://localhost:${port}/garmin/sleep`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            }
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                        }
+                        
+                        const data = await response.json();
+                        return data;
+                    } catch (error) {
+                        return `Error fetching Garmin sleep data: ${error.message}`;
+                    }
+                },
+                formatMessage: () => "Fetching Garmin sleep data",
+                shouldRegister: () => true
+            });
+
+            context.registerFunctionTool({
+                name: "getGarminBodyBattery",
+                displayName: "Get Garmin Body Battery",
+                description: "Get body battery data from Garmin Connect for a date range",
+                parameters: {
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    type: 'object',
+                    properties: {
+                        startDate: {
+                            type: 'string',
+                            description: 'Start date in YYYY-MM-DD format',
+                            format: 'date'
+                        },
+                        endDate: {
+                            type: 'string',
+                            description: 'End date in YYYY-MM-DD format (optional)',
+                            format: 'date',
+                            optional: true
+                        }
+                    },
+                    required: ['startDate']
+                },
+                action: async ({ startDate, endDate }) => {
+                    try {
+                        const port = window.apiStatsFetcher.settings.apiPort;
+                        const response = await fetch(`http://localhost:${port}/garmin/body-battery`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ start_date: startDate, end_date: endDate })
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                        }
+                        
+                        const data = await response.json();
+                        return data;
+                    } catch (error) {
+                        return `Error fetching Garmin body battery data: ${error.message}`;
+                    }
+                },
+                formatMessage: ({ startDate, endDate }) => 
+                    `Fetching Garmin body battery data from ${startDate}${endDate ? ` to ${endDate}` : ''}`,
+                shouldRegister: () => true
+            });
         }
         
         // Add settings UI
