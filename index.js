@@ -315,7 +315,7 @@ jQuery(() => {
                 action: async () => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/database/list`, {
+                        const response = await fetch(`http://localhost:${port}/database/get-index`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -355,7 +355,7 @@ jQuery(() => {
                 action: async ({ filename }) => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/database/read`, {
+                        const response = await fetch(`http://localhost:${port}/database/read-file`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -400,7 +400,7 @@ jQuery(() => {
                 action: async ({ filename, content }) => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/database/create`, {
+                        const response = await fetch(`http://localhost:${port}/database/create-file`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -533,6 +533,7 @@ jQuery(() => {
             
             // Initial settings load
             loadSettings();
+        }
         } catch (error) {
             console.error('[SES Extensions] Error during initialization:', error);
             throw error;
