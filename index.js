@@ -428,36 +428,39 @@ jQuery(() => {
                 displayName: "Patch Database File",
                 description: "Apply unidiff patches to a file in the database directory",
                 parameters: {
-                    $schema: 'http://json-schema.org/draft-04/schema#',
-                    type: 'object',
+                    $schema: "https://json-schema.org/draft/2020-12/schema",
+                    type: "object",
                     properties: {
                         filename: {
-                            type: 'string',
-                            description: 'Name of the file to patch'
+                            type: "string",
+                            description: "Name of the file to patch"
                         },
                         diffContent: {
-                            type: 'array',
-                            description: 'Array of diff tuples in format [[-1, "text to remove"], [1, "text to add"], [0, "unchanged text"]]',
+                            type: "array",
+                            description: "Array of diff tuples in format [[-1, 'text to remove'], [1, 'text to add'], [0, 'unchanged text']]",
                             items: {
-                                type: 'array',
-                                items: [
-                                    { type: 'integer', enum: [-1, 0, 1] },
-                                    { type: 'string' }
-                                ]
+                                type: "array",
+                                prefixItems: [
+                                    { type: "integer", enum: [-1, 0, 1] },
+                                    { type: "string" }
+                                ],
+                                items: false, // Ensures that there are exactly 2 items in the tuple
+                                minItems: 2,
+                                maxItems: 2
                             }
                         },
                         dryRun: {
-                            type: 'boolean',
-                            description: 'If true, shows what changes would be made without applying them',
+                            type: "boolean",
+                            description: "If true, shows what changes would be made without applying them",
                             default: false
                         }
                     },
-                    required: ['filename', 'diffContent']
+                    required: ["filename", "diffContent"]
                 },
                 action: async ({ filename, diffContent, dryRun = false }) => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/database/patch`, {
+                        const response = await fetch(`http://localhost:${port}/database/patch-file`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
