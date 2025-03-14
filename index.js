@@ -450,7 +450,7 @@ jQuery(() => {
                         },
                         diffContent: {
                             type: 'array',
-                            description: 'Array of diff tuples in format [[-1, "text to remove"], [1, "text to add"], [0, "unchanged text"]] where -1 indicates removal, 1 indicates addition, and 0 indicates unchanged text',
+                            description: 'IMPORTANT: Must be a proper array of diff tuples, NOT a string representation. Format as [[-1, \"text to remove\"], [1, \"text to add\"], [0, \"unchanged text\"]] where -1 indicates removal, 1 indicates addition, and 0 indicates unchanged text. Each tuple is a two-element array containing an operation code and the text to operate on.',
                             items: {
                                 type: 'array',
                                 prefixItems: [
