@@ -42,7 +42,7 @@ jQuery(() => {
                         console.log('Debug - maxLines:', maxLines, 'port:', port);
                         const requestBody = { max_lines: maxLines };
                         console.log('Debug - request body:', JSON.stringify(requestBody));
-                        const response = await fetch(`http://localhost:${port}/read-logs`, {
+                        const response = await fetch(`http://chamber:${port}/read-logs`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ jQuery(() => {
                 action: async () => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/garmin/user-summary`, {
+                        const response = await fetch(`http://chamber:${port}/garmin/user-summary`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -119,7 +119,7 @@ jQuery(() => {
                 action: async () => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/garmin/steps`, {
+                        const response = await fetch(`http://chamber:${port}/garmin/steps`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -154,7 +154,7 @@ jQuery(() => {
                 action: async () => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/garmin/heart-rate`, {
+                        const response = await fetch(`http://chamber:${port}/garmin/heart-rate`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -189,7 +189,7 @@ jQuery(() => {
                 action: async () => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/garmin/sleep`, {
+                        const response = await fetch(`http://chamber:${port}/garmin/sleep`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -237,7 +237,7 @@ jQuery(() => {
                 action: async ({ startDate, endDate }) => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/garmin/body-battery`, {
+                        const response = await fetch(`http://chamber:${port}/garmin/body-battery`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -287,7 +287,7 @@ jQuery(() => {
                 action: async ({ startDate, endDate }) => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/garmin/heart-rate-within-date-range`, {
+                        const response = await fetch(`http://chamber:${port}/garmin/heart-rate-within-date-range`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -325,7 +325,7 @@ jQuery(() => {
                 action: async () => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/database/get-index`, {
+                        const response = await fetch(`http://chamber:${port}/database/get-index`, {
                             method: 'GET',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -366,7 +366,7 @@ jQuery(() => {
                 action: async ({ filename }) => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/database/read-file`, {
+                        const response = await fetch(`http://chamber:${port}/database/read-file`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -412,7 +412,7 @@ jQuery(() => {
                 action: async ({ filename, content }) => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/database/create-file`, {
+                        const response = await fetch(`http://chamber:${port}/database/create-file`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -473,7 +473,7 @@ jQuery(() => {
                 action: async ({ filename, diffContent, dryRun = false }) => {
                     try {
                         const port = window.apiStatsFetcher.settings.apiPort;
-                        const response = await fetch(`http://localhost:${port}/database/patch-file`, {
+                        const response = await fetch(`http://chamber:${port}/database/patch-file`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
