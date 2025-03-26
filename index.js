@@ -496,6 +496,122 @@ jQuery(() => {
                 shouldRegister: () => true
             });
 
+            context.registerFunctionTool({
+                name: "readCalendarEvents",
+                displayName: "Read Calendar Events",
+                description: "Read calendar events between two dates. Dates should be provided in YYYY-MM-DD format and will be sent as query parameters.",
+                parameters: {
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    type: 'object',
+                    description: 'Parameters for reading calendar events',
+                    properties: {
+                        start_date: {
+                            type: 'string',
+                            description: 'Start date in YYYY-MM-DD format (sent as query parameter)'
+                        },
+                        end_date: {
+                            type: 'string',
+                            description: 'End date in YYYY-MM-DD format (sent as query parameter)'
+                        }
+                    },
+                    required: ['start_date', 'end_date']
+                },
+                action: async ({ start_date, end_date }) => {
+                    try {
+                        const port = window.apiStatsFetcher.settings.apiPort;
+                        const queryParams = new URLSearchParams({
+                            start_date,
+                            end_date
+                        });
+                        const response = await fetch(`http://chamber:${port}/calendar/events?${queryParams}`, {
+                            method: 'GET',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        return data;
+                    } catch (error) {
+                        console.error('[SES Extensions] Error fetching calendar events:', error);
+                        throw error;
+                    }
+                },
+                formatMessage({ start_date, end_date }) {
+                    return `Reading calendar events from ${start_date} to ${end_date}`;
+                },
+                shouldRegister() {
+                    return true;
+                }
+            });
+
+            context.registerFunctionTool({
+                name: "createCalendarEvent",
+                displayName: "Create Calendar Event",
+                description: "Create a new event in a specified calendar",
+                parameters: {
+                    $schema: 'http://json-schema.org/draft-04/schema#',
+                    type: 'object',
+                    description: 'Parameters for creating a calendar event',
+                    properties: {
+                        calendarName: {
+                            type: 'string',
+                            description: 'Name of the calendar to create the event in'
+                        },
+                        startDatetime: {
+                            type: 'string',
+                            description: 'Start date and time in ISO format with timezone (e.g., "2025-03-25 14:00:00+09:00")'
+                        },
+                        endDatetime: {
+                            type: 'string',
+                            description: 'End date and time in ISO format with timezone (e.g., "2025-03-25 15:00:00+09:00")'
+                        },
+                        summary: {
+                            type: 'string',
+                            description: 'Summary or title of the event'
+                        }
+                    },
+                    required: ['calendarName', 'startDatetime', 'endDatetime', 'summary']
+                },
+                action: async ({ calendarName, startDatetime, endDatetime, summary }) => {
+                    try {
+                        const port = window.apiStatsFetcher.settings.apiPort;
+                        const response = await fetch(`http://chamber:${port}/calendar/events`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({
+                                calendar_name: calendarName,
+                                start_datetime: startDatetime,
+                                end_datetime: endDatetime,
+                                summary: summary
+                            })
+                        });
+                        
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+                        }
+                        
+                        const data = await response.json();
+                        return data;
+                    } catch (error) {
+                        return `Error creating calendar event: ${error.message}`;
+                    }
+                },
+                formatMessage: ({ calendarName, startDatetime, endDatetime, summary }) => {
+                    return `Creating event "${summary}" in calendar "${calendarName}" from ${startDatetime} to ${endDatetime}`;
+                },
+                shouldRegister: () => {
+                    return true;
+                }
+            });
+
             // Add settings UI
             console.log('[SES Extensions] Adding settings UI...');
             const settingsHtml = `
